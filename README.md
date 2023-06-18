@@ -1,46 +1,90 @@
-# Getting Started with Create React App
+# shop
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+| 프로젝트 기간 | 23.06.17~                                 |
+| ------------- | ----------------------------------------- |
+| 프로젝트 목적 | react + firebase + cloudinary             |
+| Github        | https://github.com/Jinwook-Song/shop-2023 |
+| Cloudinary    | https://cloudinary.com/documentation      |
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Firebase Auth
 
-### `npm start`
+- src > api > firebase.ts
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```tsx
+import { initializeApp } from 'firebase/app';
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  onAuthStateChanged,
+  User,
+} from 'firebase/auth';
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_AUTH_DOMAIN,
+  databaseURL: process.env.REACT_APP_FIREBASE_DB_URL,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+};
 
-### `npm test`
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+export function login() {
+  return signInWithPopup(auth, provider).catch(console.error);
+}
 
-### `npm run build`
+export function logout() {
+  return signOut(auth);
+}
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+export function onUserStateChange(callback: (user: User | null) => void) {
+  onAuthStateChanged(auth, (user) => {
+    callback(user);
+  });
+}
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- NavBar
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+컴포넌트에서 비즈니스 로직을 알 필요는 없다
 
-### `npm run eject`
+```tsx
+import { Link } from 'react-router-dom';
+import { FiShoppingBag } from 'react-icons/fi';
+import { BsPencilFill } from 'react-icons/bs';
+import { login, logout, onUserStateChange } from 'api/firebase';
+import { useEffect, useState } from 'react';
+import { User } from 'firebase/auth';
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+export default function NavBar() {
+  const [user, setUser] = useState<User | null>(null);
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+  useEffect(() => {
+    onUserStateChange(setUser);
+  }, []);
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+  return (
+    <header className='flex justify-between border-b border-gray-300 p-2'>
+      <Link to='/' className='flex items-center text-4xl text-brand'>
+        <FiShoppingBag />
+        <h1>Shop</h1>
+      </Link>
+      <nav className='flex items-center gap-4 font-semibold'>
+        <Link to={'/products'}>Products</Link>
+        <Link to={'/carts'}>Carts</Link>
+        <Link to={'/products/new'} className='text-2xl'>
+          <BsPencilFill />
+        </Link>
+        {!user && <button onClick={login}>Login</button>}
+        {user && <button onClick={logout}>Logout</button>}
+      </nav>
+    </header>
+  );
+}
+```
