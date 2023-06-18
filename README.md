@@ -88,3 +88,31 @@ export default function NavBar() {
   );
 }
 ```
+
+- isAdmin
+
+realtime database에 admin uid를 등록해두고 속성에 추가
+
+```tsx
+export function onUserStateChange(callback: (user: User | null) => void) {
+  onAuthStateChanged(auth, async (user) => {
+    const updatedUser = user ? await adminUser(user) : null;
+    callback(updatedUser);
+  });
+}
+
+export type AdminUser = User & {
+  isAdmin?: boolean;
+};
+async function adminUser(user: User) {
+  return get(ref(database, 'admins')) //
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        const admins = snapshot.val() as string[];
+        const isAdmin = admins.includes(user.uid);
+        return { ...user, isAdmin };
+      }
+      return user;
+    });
+}
+```
