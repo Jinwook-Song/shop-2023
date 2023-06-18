@@ -4,6 +4,7 @@ import { BsPencilFill } from 'react-icons/bs';
 import { AdminUser, login, logout, onUserStateChange } from 'api/firebase';
 import { useEffect, useState } from 'react';
 import Avatar from './Avatar';
+import Button from './ui/Button';
 
 export default function NavBar() {
   const [user, setUser] = useState<AdminUser | null>(null);
@@ -27,8 +28,8 @@ export default function NavBar() {
           <BsPencilFill />
         </Link>
         {user && <Avatar user={user} />}
-        {!user && <button onClick={login}>Login</button>}
-        {user && <button onClick={logout}>Logout</button>}
+        {!user && <Button text='Login' onClick={login} />}
+        {user && <Button text='Logout' onClick={logout} />}
       </nav>
     </header>
   );

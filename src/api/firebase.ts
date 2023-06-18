@@ -41,7 +41,7 @@ export function onUserStateChange(callback: (user: User | null) => void) {
 export type AdminUser = User & {
   isAdmin?: boolean;
 };
-async function adminUser(user: User) {
+async function adminUser(user: User): Promise<AdminUser> {
   return get(ref(database, 'admins')) //
     .then((snapshot) => {
       if (snapshot.exists()) {
