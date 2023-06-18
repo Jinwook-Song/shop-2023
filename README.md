@@ -116,3 +116,99 @@ async function adminUser(user: User) {
     });
 }
 ```
+
+## Auth Context
+
+```tsx
+import { AdminUser, login, logout, onUserStateChange } from 'api/firebase';
+import { createContext, useContext, useEffect, useState } from 'react';
+
+type AuthContextType = {
+  user: AdminUser | null;
+  login: () => void;
+  logout: () => void;
+};
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+type Props = {
+  children: React.ReactNode;
+};
+
+export function AuthContextProvider({ children }: Props) {
+  const [user, setUser] = useState<AdminUser | null>(null);
+
+  useEffect(() => {
+    onUserStateChange(setUser);
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuthContext() {
+  return useContext(AuthContext);
+}
+```
+
+- routes
+
+```tsx
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <App />,
+    errorElement: <NotFound />,
+    children: [
+      { index: true, path: '/', element: <Home /> },
+      { path: '/products', element: <AllProducts /> },
+      {
+        path: '/products/new',
+        element: (
+          <ProtectedRoute requiredAdmin>
+            <NewProduct />
+          </ProtectedRoute>
+        ),
+      },
+      { path: '/products/:id', element: <ProductDetail /> },
+      {
+        path: '/carts',
+        element: (
+          <ProtectedRoute>
+            <MyCart />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
+]);
+```
+
+- protected component
+
+```tsx
+import { useAuthContext } from 'components/context/AuthContext';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+
+type Props = {
+  children: React.ReactNode;
+  requiredAdmin?: boolean;
+};
+
+export default function ProtectedRoute({
+  children,
+  requiredAdmin = false,
+}: Props) {
+  const user = useAuthContext()?.user;
+
+  if (!user || (requiredAdmin && !user.isAdmin)) {
+    return <Navigate to={'/'} replace />;
+  }
+
+  return <>{children}</>;
+}
+```

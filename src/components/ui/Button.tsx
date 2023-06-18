@@ -2,7 +2,7 @@ import { cls } from 'utils/util';
 
 type Props = {
   text: string;
-  onClick: () => {};
+  onClick: () => void;
   className?: string;
 };
 export default function Button({ text, onClick, className }: Props) {
