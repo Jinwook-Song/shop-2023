@@ -55,12 +55,18 @@ async function adminUser(user: User): Promise<AdminUser> {
     });
 }
 
-type ProductType = {
+export type ProductType = {
+  id: string;
+  imageUrl: string;
+} & ProductInputType;
+
+export async function addNewProduct({
+  product,
+  imageUrl,
+}: {
   product: ProductInputType;
   imageUrl: string;
-};
-
-export async function addNewProduct({ product, imageUrl }: ProductType) {
+}) {
   const id = uuid();
   return set(ref(database, `products/${id}`), {
     ...product,
@@ -68,5 +74,14 @@ export async function addNewProduct({ product, imageUrl }: ProductType) {
     price: parseInt(product.price),
     options: product.options.split(','),
     imageUrl,
+  });
+}
+
+export async function getProducts(): Promise<ProductType[]> {
+  return get(ref(database, 'products')).then((snapshot) => {
+    if (snapshot.exists()) {
+      return Object.values(snapshot.val());
+    }
+    return [];
   });
 }

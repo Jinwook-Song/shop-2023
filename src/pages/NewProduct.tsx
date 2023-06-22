@@ -15,11 +15,15 @@ export type ProductInputType = {
 export default function NewProduct() {
   const [product, setProduct] = useState<ProductInputType>();
   const [file, setFile] = useState<File>();
+  const [fileUrl, setFileUrl] = useState<string>();
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>();
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    console.log(e.currentTarget.ariaDisabled);
+    if (!file) return;
+    setIsUploading(true);
     uploadImage(file!) //
       .then((url) => {
         addNewProduct({ product: product!, imageUrl: url }).then(() => {
@@ -30,6 +34,7 @@ export default function NewProduct() {
         });
         setProduct(undefined);
         setFile(undefined);
+        setFileUrl(undefined);
       })
       .finally(() => setIsUploading(false));
   };
@@ -38,6 +43,7 @@ export default function NewProduct() {
     const { name, value, files } = e.currentTarget;
     if (name === 'file' && files) {
       setFile(files[0]);
+      setFileUrl(URL.createObjectURL(files[0]));
       return;
     }
 
@@ -48,11 +54,7 @@ export default function NewProduct() {
       <h2 className='text-2xl font-semibold my-4'>새로움 제품 등록</h2>
       {success && <p className='my-2'>✅ 제품이 추가되었습니다. </p>}
       {file && (
-        <img
-          className='w-96 mx-auto mb-2'
-          src={URL.createObjectURL(file)}
-          alt={file.name}
-        />
+        <img className='w-96 mx-auto mb-2' src={fileUrl} alt={file.name} />
       )}
       <form
         id='upload-product-form'
