@@ -1,23 +1,37 @@
+import { addNewProduct } from 'api/firebase';
 import { uploadImage } from 'api/uploader';
 import Button from 'components/ui/Button';
 import { ChangeEvent, FormEvent, useState } from 'react';
+import { cls } from 'utils/util';
 
-type ProductInputType = {
+export type ProductInputType = {
   title: string;
   price: string;
   category: string;
   description: string;
   options: string;
-  [key: string]: any;
 };
 
 export default function NewProduct() {
   const [product, setProduct] = useState<ProductInputType>();
   const [file, setFile] = useState<File>();
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>();
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    uploadImage(file!).then((url) => console.log(url));
+    uploadImage(file!) //
+      .then((url) => {
+        addNewProduct({ product: product!, imageUrl: url }).then(() => {
+          setSuccess(true);
+          setTimeout(() => {
+            setSuccess(undefined);
+          }, 4000);
+        });
+        setProduct(undefined);
+        setFile(undefined);
+      })
+      .finally(() => setIsUploading(false));
   };
 
   const handleChnage = (e: ChangeEvent<HTMLInputElement>) => {
@@ -30,16 +44,37 @@ export default function NewProduct() {
     setProduct((product) => ({ ...product!, [name]: value }));
   };
   return (
-    <section>
-      {file && <img src={URL.createObjectURL(file)} alt={file.name} />}
-      <form onSubmit={handleSubmit}>
-        <input
-          type='file'
-          name='file'
-          accept='image/*'
-          required
-          onChange={handleChnage}
+    <section className='w-full text-center'>
+      <h2 className='text-2xl font-semibold my-4'>새로움 제품 등록</h2>
+      {success && <p className='my-2'>✅ 제품이 추가되었습니다. </p>}
+      {file && (
+        <img
+          className='w-96 mx-auto mb-2'
+          src={URL.createObjectURL(file)}
+          alt={file.name}
         />
+      )}
+      <form
+        id='upload-product-form'
+        className='flex flex-col px-12'
+        onSubmit={handleSubmit}
+      >
+        <label
+          className={cls(
+            'cursor-pointer border-dashed hover:bg-zinc-100 active:bg-zinc-200',
+            file ? 'hidden' : 'block'
+          )}
+        >
+          {`Select Image`}
+          <input
+            className='hidden'
+            type='file'
+            name='file'
+            accept='image/*'
+            required
+            onChange={handleChnage}
+          />
+        </label>
         <input
           type='text'
           name='title'
@@ -80,7 +115,11 @@ export default function NewProduct() {
           required
           onChange={handleChnage}
         />
-        <Button text={'제품 등록하기'} onClick={() => {}} />
+        <Button
+          disabled={isUploading}
+          text={isUploading ? '업로드중...' : '제품 등록하기'}
+          onClick={handleSubmit}
+        />
       </form>
     </section>
   );
