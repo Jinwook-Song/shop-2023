@@ -1,3 +1,4 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { addNewProduct } from 'api/firebase';
 import { uploadImage } from 'api/uploader';
 import Button from 'components/ui/Button';
@@ -12,12 +13,22 @@ export type ProductInputType = {
   options: string;
 };
 
+type AddNewProduct = {
+  product: ProductInputType;
+  imageUrl: string;
+};
+
 export default function NewProduct() {
   const [product, setProduct] = useState<ProductInputType>();
   const [file, setFile] = useState<File>();
   const [fileUrl, setFileUrl] = useState<string>();
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>();
+  const queryClient = useQueryClient();
+  const addProduct = useMutation<void, unknown, AddNewProduct>({
+    mutationFn: ({ product, imageUrl }) => addNewProduct({ product, imageUrl }),
+    onSuccess: () => queryClient.invalidateQueries(['products']),
+  });
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -26,12 +37,17 @@ export default function NewProduct() {
     setIsUploading(true);
     uploadImage(file!) //
       .then((url) => {
-        addNewProduct({ product: product!, imageUrl: url }).then(() => {
-          setSuccess(true);
-          setTimeout(() => {
-            setSuccess(undefined);
-          }, 4000);
-        });
+        addProduct.mutate(
+          { product: product!, imageUrl: url! },
+          {
+            onSuccess: () => {
+              setSuccess(true);
+              setTimeout(() => {
+                setSuccess(undefined);
+              }, 4000);
+            },
+          }
+        );
         setProduct(undefined);
         setFile(undefined);
         setFileUrl(undefined);
