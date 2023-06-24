@@ -3,6 +3,7 @@ import { getCart } from 'api/firebase';
 import CartItem from 'components/CartItem';
 import { useAuthContext } from 'components/context/AuthContext';
 import PriceCard from 'components/PriceCard';
+import Button from 'components/ui/Button';
 import { BsFillPlusCircleFill } from 'react-icons/bs';
 import { FaEquals } from 'react-icons/fa';
 
@@ -26,8 +27,10 @@ export default function MyCart() {
     0;
 
   return (
-    <section>
-      <p>내 장바구니</p>
+    <section className='p-8 flex flex-col'>
+      <p className='text-2xl text-center font-semibold'>내 장바구니</p>
+      <hr className='my-4' />
+
       {!hasProducts && <p>장바구니에 상품이 없습니다.</p>}
       {hasProducts && (
         <>
@@ -36,13 +39,15 @@ export default function MyCart() {
               <CartItem key={product.id} product={product} uid={uid} />
             ))}
           </ul>
-          <div>
+          <hr className='my-4' />
+          <div className='flex justify-between items-center mb-8 px-2 md:px-8 lg:px-16'>
             <PriceCard text='상품 총액' price={totalPrice} />
-            <BsFillPlusCircleFill />
+            <BsFillPlusCircleFill className='shrink-0' />
             <PriceCard text='배송액' price={SHIPPING} />
-            <FaEquals />
+            <FaEquals className='shrink-0' />
             <PriceCard text='총 가격' price={totalPrice + SHIPPING} />
           </div>
+          <Button text='주문하기' onClick={() => {}} />
         </>
       )}
     </section>
