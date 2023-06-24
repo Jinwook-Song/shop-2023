@@ -1,6 +1,6 @@
 # shop
 
-| 프로젝트 기간 | 23.06.17~                                 |
+| 프로젝트 기간 | 23.06.17~23.06.24                         |
 | ------------- | ----------------------------------------- |
 | 프로젝트 목적 | react + firebase + cloudinary             |
 | Github        | https://github.com/Jinwook-Song/shop-2023 |
@@ -230,5 +230,80 @@ export async function uploadImage(file: File) {
   })
     .then((res) => res.json())
     .then((data) => data.url);
+}
+```
+
+## React query with Custom Hook
+
+- useProducts
+
+```tsx
+import { ProductType, getProducts, addNewProduct } from 'api/firebase';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ProductInputType } from 'pages/NewProduct';
+
+type AddNewProduct = {
+  product: ProductInputType;
+  imageUrl: string;
+};
+
+// ui, biz 분리
+export default function useProducts() {
+  const queryClient = useQueryClient();
+
+  const productsQuery = useQuery<ProductType[]>(['products'], getProducts, {
+    staleTime: 1000 * 60,
+  });
+
+  const addProductMutation = useMutation<void, unknown, AddNewProduct>({
+    mutationFn: ({ product, imageUrl }) => addNewProduct({ product, imageUrl }),
+    onSuccess: () => queryClient.invalidateQueries(['products']),
+  });
+
+  return { productsQuery, addProductMutation };
+}
+```
+
+- useCart
+
+```tsx
+import {
+  getCart,
+  AddOrUpdateCart,
+  addOrUpdateToCart,
+  removeFromCart,
+} from 'api/firebase';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuthContext } from 'components/context/AuthContext';
+
+export default function useCart() {
+  const uid = useAuthContext()?.user?.uid || '';
+
+  const queryClient = useQueryClient();
+
+  const cartQuery = useQuery(['carts', uid], () => getCart(uid), {
+    enabled: !!uid, // 사용자 없는경우, query가 수행되지 않도록
+    staleTime: 1000 * 60,
+  });
+
+  const addOrUpdateToCartMutation = useMutation<
+    void,
+    unknown,
+    AddOrUpdateCart['product']
+  >({
+    mutationFn: (product) => addOrUpdateToCart({ uid, product }),
+    onSuccess: () => queryClient.invalidateQueries(['carts', uid]),
+  });
+
+  const removeFromCartMutation = useMutation<void, unknown, string>({
+    mutationFn: (productId) => removeFromCart({ uid, productId }),
+    onSuccess: () => queryClient.invalidateQueries(['carts', uid]),
+  });
+
+  return {
+    cartQuery,
+    addOrUpdateToCartMutation,
+    removeFromCartMutation,
+  };
 }
 ```
