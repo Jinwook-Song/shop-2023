@@ -1,10 +1,11 @@
 # shop
 
-| 프로젝트 기간 | 23.06.17~23.06.24                         |
-| ------------- | ----------------------------------------- |
-| 프로젝트 목적 | react + firebase + cloudinary             |
-| Github        | https://github.com/Jinwook-Song/shop-2023 |
-| Cloudinary    | https://cloudinary.com/documentation      |
+| 프로젝트 기간 | 23.06.17~23.06.24                                |
+| ------------- | ------------------------------------------------ |
+| 프로젝트 목적 | react + firebase + cloudinary                    |
+| Github        | https://github.com/Jinwook-Song/shop-2023        |
+| Cloudinary    | https://cloudinary.com/documentation             |
+| Deploy        | https://enchanting-pithivier-c728dd.netlify.app/ |
 
 ---
 
