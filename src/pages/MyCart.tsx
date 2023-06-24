@@ -1,20 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
-import { getCart } from 'api/firebase';
 import CartItem from 'components/CartItem';
-import { useAuthContext } from 'components/context/AuthContext';
 import PriceCard from 'components/PriceCard';
 import Button from 'components/ui/Button';
+import useCart from 'hooks/useCart';
 import { BsFillPlusCircleFill } from 'react-icons/bs';
 import { FaEquals } from 'react-icons/fa';
 
 const SHIPPING = 3000;
 
 export default function MyCart() {
-  const uid = useAuthContext()?.user?.uid!;
   const {
-    data: products, //
-    isLoading,
-  } = useQuery(['carts'], () => getCart(uid));
+    cartQuery: { data: products, isLoading },
+  } = useCart();
   if (isLoading) return <p>Loading...</p>;
 
   const hasProducts = products && products.length > 0;
@@ -36,7 +32,7 @@ export default function MyCart() {
         <>
           <ul>
             {products.map((product) => (
-              <CartItem key={product.id} product={product} uid={uid} />
+              <CartItem key={product.id} product={product} />
             ))}
           </ul>
           <hr className='my-4' />

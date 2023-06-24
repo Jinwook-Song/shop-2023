@@ -1,6 +1,6 @@
-import { AddOrUpdateCart, addOrUpdateToCart, ProductType } from 'api/firebase';
-import { useAuthContext } from 'components/context/AuthContext';
+import { AddOrUpdateCart, ProductType } from 'api/firebase';
 import Button from 'components/ui/Button';
+import useCart from 'hooks/useCart';
 import { ChangeEvent, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -11,14 +11,14 @@ type State = {
 };
 
 export default function ProductDetail() {
-  const uid = useAuthContext()?.user?.uid!;
   const {
     state: {
       product,
       product: { imageUrl, title, description, category, price, options },
     },
   } = useLocation() as State;
-
+  const [success, setSuccess] = useState<boolean>();
+  const { addOrUpdateToCartMutation } = useCart();
   const [selected, setSelected] = useState(options && options[0]);
   const handleSelect = (e: ChangeEvent<HTMLSelectElement>) =>
     setSelected(e.target.value);
@@ -28,7 +28,14 @@ export default function ProductDetail() {
       options: selected,
       quantity: 1,
     };
-    addOrUpdateToCart({ uid, product: selectedProduct });
+    addOrUpdateToCartMutation.mutate(selectedProduct, {
+      onSuccess: () => {
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+        }, 4000);
+      },
+    });
   };
   return (
     <>
@@ -61,6 +68,7 @@ export default function ProductDetail() {
                 options.map((option) => <option key={option}>{option}</option>)}
             </select>
           </div>
+          {success && <p className='my-2'>✅ 장바구니에 추가되었습니다. </p>}
           <Button text='장바구니에 추가' onClick={handleClick} />
         </div>
       </section>
