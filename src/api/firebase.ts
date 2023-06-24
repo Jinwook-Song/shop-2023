@@ -8,7 +8,7 @@ import {
   onAuthStateChanged,
   User,
 } from 'firebase/auth';
-import { get, getDatabase, ref, set } from 'firebase/database';
+import { get, getDatabase, ref, remove, set } from 'firebase/database';
 import { ProductInputType } from 'pages/NewProduct';
 
 const firebaseConfig = {
@@ -55,7 +55,7 @@ async function adminUser(user: User): Promise<AdminUser> {
     });
 }
 
-export type ProductType = ProductInputType & {
+export type ProductType = Omit<ProductInputType, 'options'> & {
   id: string;
   imageUrl: string;
   options: string[];
@@ -85,4 +85,29 @@ export async function getProducts(): Promise<ProductType[]> {
     }
     return [];
   });
+}
+
+export async function getCart(uid: string) {
+  return get(ref(database, `carts/${uid}`)).then((snapshot) => {
+    const items = snapshot.val() || {};
+    return Object.values(items);
+  });
+}
+
+export type AddOrUpdateCart = {
+  uid: string;
+  product: Omit<ProductType, 'options'> & {
+    options: string;
+    quantity: number;
+  };
+};
+
+export async function addOrUpdateToCart({ uid, product }: AddOrUpdateCart) {
+  return set(ref(database, `carts/${uid}`), {
+    [product.id]: product,
+  });
+}
+
+export async function removeFromCart(uid: string, productId: string) {
+  return remove(ref(database, `carts/${uid}/${productId}`));
 }
