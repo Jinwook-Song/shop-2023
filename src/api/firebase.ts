@@ -105,6 +105,7 @@ export type AddOrUpdateCart = {
 };
 
 export async function addOrUpdateToCart({ uid, product }: AddOrUpdateCart) {
+  if (!uid) throw new Error('user not found');
   return set(ref(database, `carts/${uid}/${product.id}`), product);
 }
 

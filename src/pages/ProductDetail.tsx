@@ -18,6 +18,7 @@ export default function ProductDetail() {
     },
   } = useLocation() as State;
   const [success, setSuccess] = useState<boolean>();
+  const [error, setError] = useState<boolean>();
   const { addOrUpdateToCartMutation } = useCart();
   const [selected, setSelected] = useState(options && options[0]);
   const handleSelect = (e: ChangeEvent<HTMLSelectElement>) =>
@@ -33,6 +34,12 @@ export default function ProductDetail() {
         setSuccess(true);
         setTimeout(() => {
           setSuccess(false);
+        }, 4000);
+      },
+      onError: () => {
+        setError(true);
+        setTimeout(() => {
+          setError(false);
         }, 4000);
       },
     });
@@ -68,7 +75,10 @@ export default function ProductDetail() {
                 options.map((option) => <option key={option}>{option}</option>)}
             </select>
           </div>
-          {success && <p className='my-2'>✅ 장바구니에 추가되었습니다. </p>}
+          {success && <p className='my-2'>✅ 장바구니에 추가되었습니다.</p>}
+          {error && (
+            <p className='my-2 text-red-600'>로그인 후 이용하실 수 있습니다.</p>
+          )}
           <Button text='장바구니에 추가' onClick={handleClick} />
         </div>
       </section>
