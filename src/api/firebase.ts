@@ -55,10 +55,11 @@ async function adminUser(user: User): Promise<AdminUser> {
     });
 }
 
-export type ProductType = {
+export type ProductType = ProductInputType & {
   id: string;
   imageUrl: string;
-} & ProductInputType;
+  options: string[];
+};
 
 export async function addNewProduct({
   product,
