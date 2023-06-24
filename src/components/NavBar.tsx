@@ -4,6 +4,7 @@ import { BsPencilFill } from 'react-icons/bs';
 import Avatar from './Avatar';
 import Button from './ui/Button';
 import { useAuthContext } from './context/AuthContext';
+import CartStatus from './CartStatus';
 
 export default function NavBar() {
   const auth = useAuthContext();
@@ -19,7 +20,11 @@ export default function NavBar() {
       </Link>
       <nav className='flex items-center gap-4 font-semibold'>
         <Link to={'/products'}>Products</Link>
-        {user && <Link to={'/carts'}>Carts</Link>}
+        {user && (
+          <Link to={'/carts'}>
+            <CartStatus />
+          </Link>
+        )}
         {user?.isAdmin && (
           <Link to={'/products/new'} className='text-2xl'>
             <BsPencilFill />

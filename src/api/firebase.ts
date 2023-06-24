@@ -87,7 +87,9 @@ export async function getProducts(): Promise<ProductType[]> {
   });
 }
 
-export async function getCart(uid: string) {
+export async function getCart(
+  uid: string
+): Promise<AddOrUpdateCart['product'][]> {
   return get(ref(database, `carts/${uid}`)).then((snapshot) => {
     const items = snapshot.val() || {};
     return Object.values(items);
@@ -103,11 +105,15 @@ export type AddOrUpdateCart = {
 };
 
 export async function addOrUpdateToCart({ uid, product }: AddOrUpdateCart) {
-  return set(ref(database, `carts/${uid}`), {
-    [product.id]: product,
-  });
+  return set(ref(database, `carts/${uid}/${product.id}`), product);
 }
 
-export async function removeFromCart(uid: string, productId: string) {
+export async function removeFromCart({
+  uid,
+  productId,
+}: {
+  uid: string;
+  productId: string;
+}) {
   return remove(ref(database, `carts/${uid}/${productId}`));
 }
